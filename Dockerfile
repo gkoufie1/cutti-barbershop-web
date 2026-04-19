@@ -1,11 +1,31 @@
-FROM nginx:1.27-alpine
+# Stage 1 — install deps in isolation so build tools never reach production
+FROM python:3.13-slim AS builder
 
-RUN rm /etc/nginx/conf.d/default.conf
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY cuttiworld.html /usr/share/nginx/html/index.html
 
-EXPOSE 80
+# Stage 2 — lean runtime image
+FROM python:3.13-slim
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget -qO- http://localhost/ || exit 1
+# Run as non-root
+RUN useradd --no-create-home --shell /bin/false appuser
+
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
+
+# Copy application code
+COPY . .
+
+RUN chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 5000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/')" || exit 1
+
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "60", "run:app"]

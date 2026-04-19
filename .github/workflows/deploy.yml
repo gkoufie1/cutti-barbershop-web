@@ -55,10 +55,10 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ── DEPLOY ────────────────────────────────────────────
-  # Requires these repository secrets to be set in GitHub:
-  #   SERVER_HOST     — IP or hostname of your VPS
-  #   SERVER_USER     — SSH username (e.g. ubuntu, root)
-  #   SERVER_SSH_KEY  — Private SSH key (the full PEM content)
+  # Secrets required in GitHub → Settings → Secrets → Actions:
+  #   SERVER_HOST     — VPS IP or hostname
+  #   SERVER_USER     — SSH username (e.g. ubuntu)
+  #   SERVER_SSH_KEY  — full private key (-----BEGIN ... -----)
   deploy:
     name: Deploy to Production
     needs: build-and-push
@@ -67,19 +67,55 @@ jobs:
     environment: production
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            docker pull ghcr.io/${{ github.repository }}:latest
-            docker stop cuttiworld 2>/dev/null || true
-            docker rm   cuttiworld 2>/dev/null || true
-            docker run -d \
-              --name cuttiworld \
-              --restart unless-stopped \
-              -p 80:80 \
-              ghcr.io/${{ github.repository }}:latest
+        env:
+          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+          IMAGE: ghcr.io/${{ github.repository }}:latest
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Write key to temp file
+          KEY_FILE=$(mktemp)
+          echo "$SSH_KEY" > "$KEY_FILE"
+          chmod 600 "$KEY_FILE"
+
+          # Copy nginx config to server
+          scp -i "$KEY_FILE" -o StrictHostKeyChecking=no \
+            nginx.conf "$USER@$HOST:/opt/cuttiworld/nginx.conf"
+
+          # Deploy
+          ssh -i "$KEY_FILE" -o StrictHostKeyChecking=no "$USER@$HOST" bash << ENDSSH
+            set -e
+            mkdir -p /opt/cuttiworld && cd /opt/cuttiworld
+
+            cat > docker-compose.yml << 'EOF'
+            services:
+              web:
+                image: ${IMAGE}
+                restart: unless-stopped
+                env_file: .env
+                expose:
+                  - "5000"
+              nginx:
+                image: nginx:1.27-alpine
+                restart: unless-stopped
+                ports:
+                  - "80:80"
+                volumes:
+                  - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+                depends_on:
+                  - web
+            EOF
+
+            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+            docker compose pull web
+            docker compose up -d --no-deps web
             docker image prune -f
+          ENDSSH
+
+          rm -f "$KEY_FILE"

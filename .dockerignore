@@ -1,7 +1,12 @@
 .git/
 .github/
 .gitignore
-docker-compose.yml
-*.log
 .env
 .env.*
+!.env.example
+docker-compose.yml
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.log
