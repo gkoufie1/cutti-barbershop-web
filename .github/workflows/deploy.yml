@@ -72,50 +72,38 @@ jobs:
 
       - name: Deploy via SSH
         env:
-          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          HOST: ${{ secrets.SERVER_HOST }}
-          USER: ${{ secrets.SERVER_USER }}
-          IMAGE: ghcr.io/${{ github.repository }}:latest
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SSH_KEY:       ${{ secrets.SERVER_SSH_KEY }}
+          HOST:          ${{ secrets.SERVER_HOST }}
+          USER:          ${{ secrets.SERVER_USER }}
+          IMAGE:         ghcr.io/${{ github.repository }}:latest
+          GITHUB_ACTOR:  ${{ github.actor }}
+          GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Write key to temp file
           KEY_FILE=$(mktemp)
-          echo "$SSH_KEY" > "$KEY_FILE"
+          printf '%s' "$SSH_KEY" > "$KEY_FILE"
           chmod 600 "$KEY_FILE"
+          SSH="ssh -i $KEY_FILE -o StrictHostKeyChecking=no"
+          SCP="scp -i $KEY_FILE -o StrictHostKeyChecking=no"
 
-          # Copy nginx config to server
-          scp -i "$KEY_FILE" -o StrictHostKeyChecking=no \
-            nginx.conf "$USER@$HOST:/opt/cuttiworld/nginx.conf"
+          # Ensure target directory exists
+          $SSH "$USER@$HOST" "mkdir -p /opt/cuttiworld"
 
-          # Deploy
-          ssh -i "$KEY_FILE" -o StrictHostKeyChecking=no "$USER@$HOST" bash << ENDSSH
-            set -e
-            mkdir -p /opt/cuttiworld && cd /opt/cuttiworld
+          # Copy production compose file and nginx config
+          $SCP nginx.conf docker-compose.prod.yml "$USER@$HOST:/opt/cuttiworld/"
 
-            cat > docker-compose.yml << 'EOF'
-            services:
-              web:
-                image: ${IMAGE}
-                restart: unless-stopped
-                env_file: .env
-                expose:
-                  - "5000"
-              nginx:
-                image: nginx:1.27-alpine
-                restart: unless-stopped
-                ports:
-                  - "80:80"
-                volumes:
-                  - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-                depends_on:
-                  - web
-            EOF
+          # Log in to registry
+          $SSH "$USER@$HOST" "echo '$GITHUB_TOKEN' | docker login ghcr.io -u '$GITHUB_ACTOR' --password-stdin"
 
-            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
-            docker compose pull web
-            docker compose up -d --no-deps web
-            docker image prune -f
-          ENDSSH
+          # Pull latest image
+          $SSH "$USER@$HOST" "cd /opt/cuttiworld && WEB_IMAGE='$IMAGE' docker compose -f docker-compose.prod.yml pull web"
+
+          # Restart web container only (db and nginx keep running)
+          $SSH "$USER@$HOST" "cd /opt/cuttiworld && WEB_IMAGE='$IMAGE' docker compose -f docker-compose.prod.yml up -d --no-deps web"
+
+          # Start db and nginx if not already running
+          $SSH "$USER@$HOST" "cd /opt/cuttiworld && WEB_IMAGE='$IMAGE' docker compose -f docker-compose.prod.yml up -d"
+
+          # Clean up old images
+          $SSH "$USER@$HOST" "docker image prune -f"
 
           rm -f "$KEY_FILE"
