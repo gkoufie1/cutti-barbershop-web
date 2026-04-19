@@ -175,7 +175,7 @@
         .add-to-cart:hover { background: var(--gold-light); }
 
         /* CART */
-        .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s; border: none; cursor: default; width: 100%; padding: 0; }
         .cart-overlay.open { opacity: 1; pointer-events: all; }
         .cart-sidebar { position: fixed; top: 0; right: -420px; width: 420px; max-width: 100vw; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 2001; transition: right 0.4s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; }
         .cart-sidebar.open { right: 0; }
@@ -431,15 +431,19 @@
             <div class="slots-grid" id="slotsGrid"></div>
             <div class="booking-form" id="bookingForm">
                 <div class="form-group">
-                    <label>Full Name</label>
+                    <label for="bName">Full Name</label>
                     <input type="text" placeholder="Your full name" id="bName" autocomplete="name">
                 </div>
                 <div class="form-group">
-                    <label>Phone Number</label>
+                    <label for="bEmail">Email Address</label>
+                    <input type="email" placeholder="you@example.com" id="bEmail" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="bPhone">Phone Number</label>
                     <input type="tel" placeholder="+1 (555) 000-0000" id="bPhone" autocomplete="tel">
                 </div>
                 <div class="form-group">
-                    <label>Select Service</label>
+                    <label for="bService">Select Service</label>
                     <select id="bService">
                         <option value="">Choose a service...</option>
                         <option>Classic Cut — $35</option>
@@ -449,7 +453,7 @@
                     </select>
                 </div>
                 <div id="bookingError" class="booking-error"></div>
-                <button class="btn-primary" id="confirmBtn" onclick="confirmBooking()" style="margin-top:0.5rem;width:100%;text-align:center;">Confirm Booking</button>
+                <button class="btn-primary" id="confirmBtn" onclick="confirmBooking()" style="margin-top:0.5rem;width:100%;text-align:center;">Pay $10 Deposit</button>
             </div>
         </div>
     </div>
@@ -525,7 +529,7 @@
 </footer>
 
 <!-- CART SIDEBAR -->
-<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<button class="cart-overlay" id="cartOverlay" aria-label="Close cart" onclick="toggleCart()"></button>
 <div class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
         <div class="cart-title">Your Cart</div>
@@ -564,9 +568,17 @@ const $ = id => document.getElementById(id);
 let currentDate = new Date();
 let selectedDate = null;
 let selectedSlot = null;
+let takenSlots   = new Set();
 const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function isUnavailable(date) { return date.getDay() === 0; }
+
+function toISODate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
 
 function renderCalendar() {
     const year = currentDate.getFullYear();
@@ -596,10 +608,11 @@ function renderCalendar() {
     grid.appendChild(frag);
 }
 
-function selectDate(date) {
+async function selectDate(date) {
     selectedDate = date; selectedSlot = null;
     $('bookingForm').classList.remove('visible');
-    renderCalendar(); renderSlots();
+    renderCalendar();
+    await fetchAndRenderSlots();
 }
 
 function changeMonth(dir) {
@@ -611,25 +624,36 @@ function changeMonth(dir) {
 }
 
 const allSlots = ['9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','1:00 PM','1:30 PM','2:00 PM','2:30 PM','3:00 PM','3:30 PM','4:00 PM','4:30 PM','5:00 PM','5:30 PM'];
-function getTakenSlots(date) { const s = date.getDate() + date.getMonth() * 31; return allSlots.filter((_,i) => (s + i * 7) % 5 === 0); }
 
-function renderSlots() {
-    const title = $('slotsTitle');
+async function fetchAndRenderSlots() {
+    const title    = $('slotsTitle');
     const subtitle = $('slotsSubtitle');
-    const grid = $('slotsGrid');
     if (!selectedDate) {
-        title.textContent = 'Select a Date';
+        title.textContent    = 'Select a Date';
         subtitle.textContent = 'Choose a date from the calendar to see available slots.';
-        grid.innerHTML = '';
+        $('slotsGrid').innerHTML = '';
         return;
     }
-    title.textContent = selectedDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-    subtitle.textContent = 'Select your preferred time slot.';
-    const taken = getTakenSlots(selectedDate);
+    title.textContent    = selectedDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+    subtitle.textContent = 'Loading available slots…';
+    $('slotsGrid').innerHTML = '';
+    try {
+        const res  = await fetch(`/slots?date=${toISODate(selectedDate)}`);
+        const data = await res.json();
+        takenSlots = new Set(data.taken || []);
+        subtitle.textContent = 'Select your preferred time slot.';
+        renderSlots();
+    } catch {
+        subtitle.textContent = 'Could not load slots. Please try again.';
+    }
+}
+
+function renderSlots() {
+    const grid = $('slotsGrid');
     const frag = document.createDocumentFragment();
     allSlots.forEach(slot => {
         const el = document.createElement('div'); el.className = 'slot'; el.textContent = slot;
-        if (taken.includes(slot)) { el.classList.add('taken'); }
+        if (takenSlots.has(slot)) { el.classList.add('taken'); }
         else {
             if (selectedSlot === slot) el.classList.add('selected');
             el.addEventListener('click', () => {
@@ -651,48 +675,43 @@ function showBookingError(msg) {
 
 async function confirmBooking() {
     const name    = $('bName').value.trim();
+    const email   = $('bEmail').value.trim();
     const phone   = $('bPhone').value.trim();
     const service = $('bService').value;
-    if (!name || !phone || !service) { showBookingError('Please fill in all fields to confirm your booking.'); return; }
-
+    if (!name || !email || !phone || !service) {
+        showBookingError('Please fill in all fields to confirm your booking.');
+        return;
+    }
     const btn = $('confirmBtn');
     btn.disabled = true;
-    btn.textContent = 'Sending…';
+    btn.textContent = 'Processing…';
     showBookingError('');
-
     try {
         const res = await fetch('/book', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name, phone, service,
-                date: selectedDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }),
-                time: selectedSlot,
-            }),
+            body: JSON.stringify({ name, email, phone, service, date: toISODate(selectedDate), time: selectedSlot }),
         });
         const data = await res.json();
         if (!res.ok) { showBookingError(data.error || 'Something went wrong. Please try again.'); return; }
-
-        const dateStr = selectedDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-        const serviceName = service.split(' —')[0];
-        $('modalMessage').textContent = `${name}, your ${serviceName} request for ${dateStr} at ${selectedSlot} has been sent. We'll confirm via phone shortly!`;
-        $('bookingModal').classList.add('open');
+        // Redirect to Stripe Checkout — user pays $10 deposit
+        window.location.href = data.checkout_url;
     } catch {
         showBookingError('Network error. Please try again.');
     } finally {
         btn.disabled = false;
-        btn.textContent = 'Confirm Booking';
+        btn.textContent = 'Pay $10 Deposit';
     }
 }
 
 function closeModal() {
     $('bookingModal').classList.remove('open');
-    ['bName', 'bPhone'].forEach(id => $(id).value = '');
+    ['bName', 'bEmail', 'bPhone'].forEach(id => $(id).value = '');
     $('bService').value = '';
     showBookingError('');
-    selectedDate = null; selectedSlot = null;
+    selectedDate = null; selectedSlot = null; takenSlots = new Set();
     $('bookingForm').classList.remove('visible');
-    renderCalendar(); renderSlots();
+    renderCalendar(); fetchAndRenderSlots();
 }
 
 // ── CART ──────────────────────────────────────────────
@@ -766,7 +785,14 @@ const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isI
 document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
 
 // ── INIT ──────────────────────────────────────────────
-renderCalendar(); renderSlots(); updateCartUI();
+renderCalendar(); updateCartUI();
+
+// Show confirmation modal if redirected back from Stripe success
+if (new URLSearchParams(location.search).get('booked') === '1') {
+    $('modalMessage').textContent = 'Your deposit was received and your appointment is confirmed. See you soon!';
+    $('bookingModal').classList.add('open');
+    history.replaceState({}, '', location.pathname);
+}
 </script>
 </body>
 </html>

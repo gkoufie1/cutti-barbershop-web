@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuttiWorld — Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0c0906; --surface: #18110a; --cream: #f0e6cf;
+            --cream-dim: #b8a88a; --gold: #c8993e; --border: #3a2a16;
+        }
+        body { background: var(--bg); color: var(--cream); font-family: 'Jost', sans-serif; font-weight: 300; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .card { background: var(--surface); border: 1px solid var(--border); padding: 3rem 2.5rem; width: 100%; max-width: 380px; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--gold); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+        .subtitle { font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--cream-dim); margin-bottom: 2.5rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+        label { font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cream-dim); }
+        input { background: var(--bg); border: 1px solid var(--border); color: var(--cream); padding: 0.72rem 1rem; font-family: 'Jost', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s; width: 100%; }
+        input:focus { border-color: var(--gold); }
+        button { width: 100%; margin-top: 1rem; background: var(--gold); color: var(--bg); border: none; padding: 0.85rem; font-family: 'Jost', sans-serif; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #e8bf6e; }
+        .flash { font-size: 0.78rem; color: #c0392b; border: 1px solid #c0392b; padding: 0.55rem 0.9rem; margin-bottom: 1.2rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">CuttiWorld</div>
+        <div class="subtitle">Admin Access</div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="flash">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" autocomplete="username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+</body>
+</html>

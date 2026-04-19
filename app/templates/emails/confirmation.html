@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { margin: 0; padding: 0; background: #0c0906; font-family: 'Georgia', serif; }
+        .wrap { max-width: 520px; margin: 0 auto; background: #18110a; border: 1px solid #3a2a16; }
+        .header { background: #0c0906; padding: 2rem 2.5rem; border-bottom: 1px solid #3a2a16; }
+        .logo { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.15em; color: #c8993e; text-transform: uppercase; }
+        .body { padding: 2.5rem; }
+        h1 { font-size: 1.5rem; color: #f0e6cf; margin-bottom: 0.5rem; }
+        .subtitle { font-style: italic; color: #b8a88a; margin-bottom: 2rem; font-size: 1rem; }
+        .detail-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #3a2a16; }
+        .detail-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #b8a88a; font-family: Arial, sans-serif; }
+        .detail-value { color: #f0e6cf; font-family: Arial, sans-serif; font-size: 0.9rem; }
+        .deposit-note { margin-top: 1.5rem; background: #221a0e; border: 1px solid #5a4430; padding: 1rem 1.2rem; font-family: Arial, sans-serif; font-size: 0.82rem; color: #b8a88a; line-height: 1.6; }
+        .footer { padding: 1.5rem 2.5rem; border-top: 1px solid #3a2a16; font-family: Arial, sans-serif; font-size: 0.72rem; color: #b8a88a; line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="header">
+            <div class="logo">CuttiWorld</div>
+        </div>
+        <div class="body">
+            <h1>You're Confirmed, {{ booking.name.split()[0] }}.</h1>
+            <p class="subtitle">Your appointment is locked in.</p>
+
+            <div class="detail-row">
+                <span class="detail-label">Service</span>
+                <span class="detail-value">{{ booking.service.split(' —')[0] }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date</span>
+                <span class="detail-value">{{ booking.date.strftime('%A, %B %d %Y') }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Time</span>
+                <span class="detail-value">{{ booking.time_slot }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Deposit Paid</span>
+                <span class="detail-value">$10.00 ✓</span>
+            </div>
+
+            <div class="deposit-note">
+                Your $10 deposit is credited toward your service on the day.
+                To cancel or reschedule, call us at (555) 123-4567 at least 24 hours in advance.
+            </div>
+        </div>
+        <div class="footer">
+            123 Main Street, Suite 4 &nbsp;·&nbsp; (555) 123-4567<br>
+            Mon–Fri 9am–7pm &nbsp;·&nbsp; Saturday 9am–5pm
+        </div>
+    </div>
+</body>
+</html>

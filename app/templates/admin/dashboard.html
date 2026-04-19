@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuttiWorld — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0c0906; --surface: #18110a; --surface-2: #221a0e;
+            --cream: #f0e6cf; --cream-dim: #b8a88a; --gold: #c8993e;
+            --gold-light: #e8bf6e; --border: #3a2a16; --border-light: #5a4430;
+            --green: #2e7d4f; --red: #8b1c1c;
+        }
+        body { background: var(--bg); color: var(--cream); font-family: 'Jost', sans-serif; font-weight: 300; min-height: 100vh; }
+
+        /* TOP BAR */
+        header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        .header-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold); letter-spacing: 0.15em; text-transform: uppercase; }
+        .header-right { display: flex; align-items: center; gap: 1.5rem; }
+        .header-right span { font-size: 0.72rem; color: var(--cream-dim); letter-spacing: 0.1em; }
+        .logout-btn { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream-dim); text-decoration: none; border: 1px solid var(--border); padding: 0.4rem 0.9rem; transition: all 0.2s; }
+        .logout-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* MAIN */
+        main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--cream); margin-bottom: 0.3rem; }
+        .date-label { font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--cream-dim); margin-bottom: 2rem; }
+
+        /* STATS */
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; }
+        .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); line-height: 1; }
+        .stat-label { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream-dim); margin-top: 0.3rem; }
+
+        /* FLASH */
+        .flash { font-size: 0.78rem; color: var(--gold); border: 1px solid var(--gold); padding: 0.6rem 1rem; margin-bottom: 1.5rem; }
+
+        /* TABLE */
+        .section-label { font-size: 0.64rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cream-dim); padding: 0.7rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: var(--cream); vertical-align: middle; }
+        tr:hover td { background: var(--surface); }
+
+        .badge { display: inline-block; font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.2rem 0.6rem; font-weight: 600; }
+        .badge-pending   { background: rgba(200,153,62,0.15); color: var(--gold); border: 1px solid var(--gold); }
+        .badge-confirmed { background: rgba(46,125,79,0.15);  color: #4caf82;     border: 1px solid #2e7d4f; }
+        .badge-completed { background: rgba(90,68,48,0.3);    color: var(--cream-dim); border: 1px solid var(--border-light); }
+
+        .actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .btn-action { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; border: none; padding: 0.35rem 0.8rem; cursor: pointer; font-family: 'Jost', sans-serif; font-weight: 500; transition: opacity 0.2s; }
+        .btn-action:hover { opacity: 0.8; }
+        .btn-confirm  { background: var(--green); color: #fff; }
+        .btn-complete { background: var(--border-light); color: var(--cream); }
+        .btn-cancel   { background: var(--red); color: #fff; }
+
+        .empty { text-align: center; padding: 3rem; color: var(--cream-dim); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-logo">CuttiWorld</div>
+        <div class="header-right">
+            <span>Admin Dashboard</span>
+            <a href="{{ url_for('admin.logout') }}" class="logout-btn">Sign Out</a>
+        </div>
+    </header>
+
+    <main>
+        <h1>Schedule</h1>
+        <div class="date-label">Next 7 days — {{ today.strftime('%A, %B %d %Y') }}</div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}{% for msg in messages %}
+                <div class="flash">{{ msg }}</div>
+            {% endfor %}{% endif %}
+        {% endwith %}
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ bookings | length }}</div>
+                <div class="stat-label">Upcoming</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ pending_count }}</div>
+                <div class="stat-label">Awaiting Confirm</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ confirmed_count }}</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+        </div>
+
+        <div class="section-label">Bookings</div>
+        <div class="table-wrap">
+            {% if bookings %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Client</th>
+                        <th>Phone</th>
+                        <th>Service</th>
+                        <th>Deposit</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td>{{ b.date.strftime('%a %b %d') }}</td>
+                        <td>{{ b.time_slot }}</td>
+                        <td>{{ b.name }}</td>
+                        <td>{{ b.phone }}</td>
+                        <td>{{ b.service.split(' —')[0] }}</td>
+                        <td>{{ '✓ Paid' if b.deposit_paid else '—' }}</td>
+                        <td>
+                            {% if b.status == 'pending' %}
+                                <span class="badge badge-pending">Pending</span>
+                            {% elif b.status == 'confirmed' %}
+                                <span class="badge badge-confirmed">Confirmed</span>
+                            {% else %}
+                                <span class="badge badge-completed">{{ b.status | capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                {% if b.status == 'pending' %}
+                                <form method="POST" action="{{ url_for('admin.confirm', booking_id=b.id) }}">
+                                    <button class="btn-action btn-confirm">Confirm</button>
+                                </form>
+                                {% endif %}
+                                {% if b.status == 'confirmed' %}
+                                <form method="POST" action="{{ url_for('admin.complete', booking_id=b.id) }}">
+                                    <button class="btn-action btn-complete">Done</button>
+                                </form>
+                                {% endif %}
+                                {% if b.status in ['pending', 'confirmed'] %}
+                                <form method="POST" action="{{ url_for('admin.cancel', booking_id=b.id) }}" onsubmit="return confirm('Cancel this booking?')">
+                                    <button class="btn-action btn-cancel">Cancel</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div class="empty">No upcoming bookings for the next 7 days.</div>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>
