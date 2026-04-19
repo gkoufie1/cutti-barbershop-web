@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CuttiWorld Barber Studio — precision cuts, royal shaves, and beard sculpts. Book your appointment online.">
+    <title>CuttiWorld — Barber Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0c0906;
+            --surface: #18110a;
+            --surface-2: #221a0e;
+            --cream: #f0e6cf;
+            --cream-dim: #b8a88a;
+            --gold: #c8993e;
+            --gold-light: #e8bf6e;
+            --crimson: #8b1c1c;
+            --border: #3a2a16;
+            --border-light: #5a4430;
+        }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--cream); font-family: 'Jost', sans-serif; font-weight: 300; overflow-x: hidden; }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 10; opacity: 0.4;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 1.2rem 4rem;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(12,9,6,0.94); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; }
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cream-dim); text-decoration: none; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-actions { display: flex; gap: 0.8rem; align-items: center; }
+        .cart-btn { background: none; border: 1px solid var(--border-light); color: var(--cream-dim); padding: 0.5rem 1rem; cursor: pointer; font-size: 0.75rem; letter-spacing: 0.1em; position: relative; transition: all 0.2s; font-family: 'Jost', sans-serif; }
+        .cart-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .cart-count { position: absolute; top: -7px; right: -7px; background: var(--gold); color: var(--bg); width: 18px; height: 18px; border-radius: 50%; font-size: 0.58rem; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .nav-book-btn { padding: 0.65rem 1.6rem; font-size: 0.7rem; letter-spacing: 0.2em; }
+        .nav-book-btn:hover { background: var(--gold-light); transform: none; }
+
+        /* HERO */
+        #hero {
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; position: relative; padding: 6rem 2rem 5rem;
+            background: radial-gradient(ellipse at 50% 35%, rgba(200,153,62,0.07) 0%, transparent 65%), var(--bg);
+        }
+        #hero::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: repeating-linear-gradient(-45deg, transparent, transparent 70px, rgba(139,28,28,0.025) 70px, rgba(139,28,28,0.025) 72px);
+        }
+        .hero-eyebrow { font-size: 0.68rem; letter-spacing: 0.42em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.8rem; opacity: 0; animation: fadeUp 0.8s 0.2s ease forwards; }
+        .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(4.5rem, 13vw, 11rem); font-weight: 900; line-height: 0.88; letter-spacing: -0.02em; color: var(--cream); margin-bottom: 0.25em; opacity: 0; animation: fadeUp 0.8s 0.4s ease forwards; }
+        .hero-title span { color: var(--gold); font-style: italic; }
+        .hero-ornament { display: flex; align-items: center; gap: 1.2rem; margin: 1.8rem 0; opacity: 0; animation: fadeUp 0.8s 0.6s ease forwards; }
+        .orn-line { width: 90px; height: 1px; }
+        .orn-line-l { background: linear-gradient(to right, transparent, var(--gold)); }
+        .orn-line-r { background: linear-gradient(to left, transparent, var(--gold)); }
+        .hero-ornament > span { color: var(--gold); font-size: 1rem; }
+        .hero-tagline { font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 2.5vw, 1.55rem); font-style: italic; color: var(--cream-dim); letter-spacing: 0.04em; margin-bottom: 3rem; opacity: 0; animation: fadeUp 0.8s 0.7s ease forwards; }
+        .hero-cta { display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; opacity: 0; animation: fadeUp 0.8s 0.9s ease forwards; }
+        .btn-primary { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--bg); background: var(--gold); border: none; padding: 1rem 2.6rem; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; font-family: 'Jost', sans-serif; }
+        .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+        .btn-outline { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cream); background: transparent; border: 1px solid var(--border-light); padding: 1rem 2.6rem; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; font-family: 'Jost', sans-serif; }
+        .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+        .hero-scroll { position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; opacity: 0; animation: fadeUp 0.8s 1.2s ease forwards; }
+        .hero-scroll span { font-size: 0.58rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--cream-dim); }
+        .scroll-line { width: 1px; height: 42px; background: linear-gradient(to bottom, var(--gold), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+
+        /* SECTIONS */
+        section { padding: 6rem 4rem; }
+        .section-label { font-size: 0.64rem; letter-spacing: 0.42em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem; }
+        .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; color: var(--cream); }
+        .section-title em { color: var(--gold); font-style: italic; }
+        .ornament-divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; }
+        .ornament-divider::before, .ornament-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .ornament-divider span { color: var(--gold); font-size: 0.7rem; }
+
+        /* ABOUT */
+        #about-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.2fr; gap: 6rem; align-items: center; }
+        .about-photo { aspect-ratio: 3/4; background: var(--surface); border: 1px solid var(--border); position: relative; overflow: hidden; }
+        .about-photo::before { content: ''; position: absolute; inset: 14px; border: 1px solid var(--border-light); z-index: 1; pointer-events: none; }
+        .about-photo-inner { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: var(--cream-dim); opacity: 0.25; }
+        .about-photo-inner svg { width: 60px; height: 60px; }
+        .about-photo-inner p { font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; }
+        .about-text p { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; line-height: 1.9; color: var(--cream-dim); margin-bottom: 1.5rem; }
+        .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 2.5rem; }
+        .stat { padding: 1.5rem; border: 1px solid var(--border); background: var(--surface); }
+        .stat-number { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 700; color: var(--gold); line-height: 1; }
+        .stat-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream-dim); margin-top: 0.3rem; }
+
+        /* SERVICES */
+        #services { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .services-header { text-align: center; margin-bottom: 4rem; }
+        .services-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5px; background: var(--border); }
+        .service-card { background: var(--surface); padding: 2.5rem 2rem; display: flex; flex-direction: column; gap: 1rem; transition: background 0.3s; }
+        .service-card:hover { background: var(--surface-2); }
+        .service-icon { font-size: 1.9rem; color: var(--gold); }
+        .service-name { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--cream); }
+        .service-desc { font-family: 'Cormorant Garamond', serif; font-size: 1rem; line-height: 1.75; color: var(--cream-dim); flex: 1; }
+        .service-price { font-size: 0.78rem; letter-spacing: 0.1em; color: var(--gold); border-top: 1px solid var(--border); padding-top: 1rem; }
+
+        /* GALLERY */
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+        .gallery-item { aspect-ratio: 1; background: var(--surface); border: 1px solid var(--border); position: relative; overflow: hidden; cursor: pointer; }
+        .gallery-item:first-child { grid-column: span 2; aspect-ratio: 2/1; }
+        .gallery-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.8rem; color: var(--cream-dim); opacity: 0.22; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; }
+        .gallery-placeholder span:first-child { font-size: 2rem; opacity: 0.5; }
+        .gallery-overlay { position: absolute; inset: 0; background: rgba(12,9,6,0.82); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .gallery-item:hover .gallery-overlay { opacity: 1; }
+        .gallery-overlay span { font-family: 'Playfair Display', serif; font-size: 0.85rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); }
+
+        /* BOOKING */
+        #booking { background: linear-gradient(135deg, rgba(200,153,62,0.04) 0%, transparent 50%), var(--bg); border-top: 1px solid var(--border); }
+        .booking-container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+        .booking-header { grid-column: 1 / -1; text-align: center; margin-bottom: 1rem; }
+        .calendar-wrapper { background: var(--surface); border: 1px solid var(--border); padding: 2rem; }
+        .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .cal-month-year { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--cream); }
+        .cal-arrow { background: none; border: 1px solid var(--border); color: var(--cream-dim); width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s; }
+        .cal-arrow:hover { border-color: var(--gold); color: var(--gold); }
+        .cal-days-header { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 0.4rem; }
+        .cal-day-name { text-align: center; font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cream-dim); padding: 0.5rem 0; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; color: var(--cream-dim); cursor: pointer; transition: all 0.15s; border: 1px solid transparent; }
+        .cal-cell:hover:not(.empty):not(.past):not(.unavailable) { border-color: var(--gold); color: var(--gold); }
+        .cal-cell.empty { cursor: default; }
+        .cal-cell.past { opacity: 0.2; cursor: not-allowed; }
+        .cal-cell.today { color: var(--gold); font-weight: 600; }
+        .cal-cell.selected { background: var(--gold); color: var(--bg); font-weight: 600; border-color: var(--gold); }
+        .cal-cell.unavailable { opacity: 0.18; cursor: not-allowed; text-decoration: line-through; }
+        .slots-wrapper { background: var(--surface); border: 1px solid var(--border); padding: 2rem; }
+        .slots-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--cream); margin-bottom: 0.4rem; }
+        .slots-subtitle { font-size: 0.74rem; color: var(--cream-dim); margin-bottom: 1.5rem; letter-spacing: 0.04em; }
+        .slots-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; margin-bottom: 1.8rem; }
+        .slot { padding: 0.6rem; border: 1px solid var(--border); text-align: center; font-size: 0.78rem; color: var(--cream-dim); cursor: pointer; transition: all 0.18s; font-family: 'Jost', sans-serif; }
+        .slot:hover:not(.taken) { border-color: var(--gold); color: var(--gold); }
+        .slot.selected { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: 600; }
+        .slot.taken { opacity: 0.25; cursor: not-allowed; text-decoration: line-through; }
+        .booking-form { display: none; flex-direction: column; gap: 0.9rem; }
+        .booking-form.visible { display: flex; }
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        .form-group label { font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cream-dim); }
+        .form-group input, .form-group select { background: var(--bg); border: 1px solid var(--border); color: var(--cream); padding: 0.72rem 1rem; font-family: 'Jost', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s; width: 100%; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+        .form-group select option { background: var(--surface); }
+
+        /* SHOP */
+        #shop { background: var(--surface); border-top: 1px solid var(--border); }
+        .shop-header { text-align: center; margin-bottom: 4rem; }
+        .shop-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .product-card { background: var(--bg); border: 1px solid var(--border); overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 24px 64px rgba(0,0,0,0.45); }
+        .product-image { aspect-ratio: 3/4; background: var(--surface-2); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .product-badge { position: absolute; top: 1rem; left: 1rem; background: var(--gold); color: var(--bg); font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.25rem 0.65rem; font-family: 'Jost', sans-serif; font-weight: 600; }
+        .product-info { padding: 1.5rem; }
+        .product-category { font-size: 0.58rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.35rem; }
+        .product-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--cream); margin-bottom: 0.4rem; }
+        .product-desc { font-family: 'Cormorant Garamond', serif; font-size: 0.98rem; color: var(--cream-dim); line-height: 1.65; margin-bottom: 1.2rem; }
+        .product-footer { display: flex; align-items: center; justify-content: space-between; }
+        .product-price { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--cream); }
+        .add-to-cart { background: var(--gold); color: var(--bg); border: none; padding: 0.6rem 1.2rem; font-family: 'Jost', sans-serif; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; font-weight: 600; }
+        .add-to-cart:hover { background: var(--gold-light); }
+
+        /* CART */
+        .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .cart-overlay.open { opacity: 1; pointer-events: all; }
+        .cart-sidebar { position: fixed; top: 0; right: -420px; width: 420px; max-width: 100vw; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 2001; transition: right 0.4s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { padding: 1.8rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .cart-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--cream); }
+        .cart-close { background: none; border: none; color: var(--cream-dim); font-size: 1.3rem; cursor: pointer; transition: color 0.2s; }
+        .cart-close:hover { color: var(--gold); }
+        .cart-items { flex: 1; overflow-y: auto; padding: 1.5rem; }
+        .cart-empty { text-align: center; padding: 3rem 2rem; }
+        .cart-empty p { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-style: italic; color: var(--cream-dim); }
+        .cart-item { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+        .cart-item-image { width: 65px; height: 80px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-family: 'Playfair Display', serif; font-size: 0.9rem; color: var(--cream); margin-bottom: 0.2rem; }
+        .cart-item-price { font-size: 0.78rem; color: var(--gold); margin-bottom: 0.7rem; }
+        .cart-item-controls { display: flex; align-items: center; gap: 0.7rem; }
+        .qty-btn { background: none; border: 1px solid var(--border); color: var(--cream-dim); width: 24px; height: 24px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .qty-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .qty-display { font-size: 0.85rem; color: var(--cream); min-width: 20px; text-align: center; }
+        .cart-item-remove { background: none; border: none; color: var(--cream-dim); cursor: pointer; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.45; transition: all 0.2s; font-family: 'Jost', sans-serif; }
+        .cart-item-remove:hover { opacity: 1; color: var(--crimson); }
+        .cart-footer { padding: 1.8rem 2rem; border-top: 1px solid var(--border); }
+        .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .cart-total-label { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cream-dim); }
+        .cart-total-amount { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--cream); }
+
+        /* FOOTER */
+        footer { background: var(--surface); border-top: 1px solid var(--border); padding: 5rem 4rem; }
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; }
+        .footer-logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--gold); margin-bottom: 0.8rem; }
+        .footer-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--cream-dim); font-size: 1.05rem; margin-bottom: 1.5rem; }
+        .footer-address { font-size: 0.8rem; color: var(--cream-dim); line-height: 2; }
+        .footer-col-title { font-size: 0.62rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem; }
+        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
+        .footer-links a { font-size: 0.83rem; color: var(--cream-dim); text-decoration: none; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--gold); }
+        .footer-hours p { font-size: 0.83rem; color: var(--cream-dim); line-height: 2.1; }
+        .footer-bottom { max-width: 1100px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .footer-bottom p { font-size: 0.68rem; color: var(--cream-dim); opacity: 0.45; }
+
+        /* BOOKING ERROR */
+        .booking-error { display: none; color: #c0392b; font-size: 0.78rem; border: 1px solid #c0392b; padding: 0.55rem 0.9rem; margin-top: -0.3rem; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 2rem; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--surface); border: 1px solid var(--border-light); padding: 3.5rem; max-width: 480px; width: 100%; text-align: center; }
+        .modal-icon { font-size: 2rem; color: var(--gold); margin-bottom: 1.5rem; letter-spacing: 0.4em; }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--cream); margin-bottom: 0.8rem; }
+        .modal-message { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--cream-dim); line-height: 1.75; margin-bottom: 2rem; font-style: italic; }
+
+        /* ANIMATIONS */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scrollPulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+        .fade-in { opacity: 0; transform: translateY(22px); transition: opacity 0.75s ease, transform 0.75s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* HAMBURGER + MOBILE NAV */
+        .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; z-index: 1001; position: relative; }
+        .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--cream-dim); transition: all 0.3s ease; }
+        .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); background: var(--gold); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--gold); }
+        .mobile-nav {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(12,9,6,0.98); backdrop-filter: blur(16px);
+            z-index: 999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2.5rem;
+            transform: translateX(100%);
+            transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+        }
+        .mobile-nav.open { transform: translateX(0); }
+        .mobile-nav a {
+            font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700;
+            color: var(--cream); text-decoration: none; letter-spacing: 0.05em; transition: color 0.2s;
+        }
+        .mobile-nav a:hover { color: var(--gold); }
+        .mobile-nav-divider { width: 40px; height: 1px; background: var(--border); }
+
+        /* RESPONSIVE */
+        @media (max-width: 960px) {
+            nav { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+            .hamburger { display: flex; }
+            section { padding: 4rem 1.5rem; }
+            #about-inner { grid-template-columns: 1fr; gap: 2rem; }
+            .booking-container { grid-template-columns: 1fr; }
+            .booking-header { grid-column: 1; }
+            .footer-inner { grid-template-columns: 1fr 1fr; }
+            .gallery-grid { grid-template-columns: 1fr 1fr; }
+            .gallery-item:first-child { grid-column: span 2; }
+            .cart-sidebar { width: 100vw; right: -100vw; }
+        }
+        @media (max-width: 600px) {
+            .hero-title { font-size: 3.5rem; }
+            .footer-inner { grid-template-columns: 1fr; }
+            .shop-grid { grid-template-columns: 1fr; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .gallery-item:first-child { grid-column: 1; aspect-ratio: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-logo">CuttiWorld</div>
+    <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#booking">Book</a></li>
+        <li><a href="#shop">Shop</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="nav-actions">
+        <button class="cart-btn" onclick="toggleCart()">
+            ✦ Cart
+            <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <a href="#booking" class="btn-primary nav-book-btn">Book Now</a>
+    </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobileNav">
+    <a href="#about" onclick="toggleMobileNav()">About</a>
+    <div class="mobile-nav-divider"></div>
+    <a href="#services" onclick="toggleMobileNav()">Services</a>
+    <div class="mobile-nav-divider"></div>
+    <a href="#gallery" onclick="toggleMobileNav()">Gallery</a>
+    <div class="mobile-nav-divider"></div>
+    <a href="#booking" onclick="toggleMobileNav()">Book</a>
+    <div class="mobile-nav-divider"></div>
+    <a href="#shop" onclick="toggleMobileNav()">Shop</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+    <p class="hero-eyebrow">Est. 2018 &nbsp;·&nbsp; Barber Studio</p>
+    <h1 class="hero-title">Cutti<em style="color:var(--gold);font-style:italic;">World</em></h1>
+    <div class="hero-ornament">
+        <div class="orn-line orn-line-l"></div>
+        <span>✦ ✦ ✦</span>
+        <div class="orn-line orn-line-r"></div>
+    </div>
+    <p class="hero-tagline">Where Tradition Meets Precision</p>
+    <div class="hero-cta">
+        <a href="#booking" class="btn-primary">Book an Appointment</a>
+        <a href="#gallery" class="btn-outline">View Our Work</a>
+    </div>
+    <div class="hero-scroll">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+    <div id="about-inner" class="fade-in">
+        <div class="about-photo">
+            <!-- Replace src with your actual barber photo -->
+            <img src="https://placehold.co/480x640/18110a/c8993e?text=Barber+Portrait" alt="CuttiWorld Barber" style="width:100%;height:100%;object-fit:cover;display:block;">
+        </div>
+        <div class="about-text">
+            <p class="section-label">The Craftsman</p>
+            <h2 class="section-title">A Cut Above <em>The Rest</em></h2>
+            <div class="ornament-divider"><span>✦</span></div>
+            <p>With over a decade of dedicated craftsmanship behind the chair, CuttiWorld is built on one philosophy — every client deserves a masterpiece. From the classic fade to the straight razor shave, each service is delivered with the precision of an artisan and the warmth of a neighbour.</p>
+            <p>Walk in. Leave looking like the finest version of yourself. Every single time.</p>
+            <div class="about-stats">
+                <div class="stat"><div class="stat-number">10+</div><div class="stat-label">Years Experience</div></div>
+                <div class="stat"><div class="stat-number">2k+</div><div class="stat-label">Happy Clients</div></div>
+                <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Satisfaction</div></div>
+                <div class="stat"><div class="stat-number">4.9 ★</div><div class="stat-label">Avg. Rating</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+    <div class="services-header fade-in">
+        <p class="section-label">What We Offer</p>
+        <h2 class="section-title">Our <em>Services</em></h2>
+    </div>
+    <div class="services-grid fade-in">
+        <div class="service-card">
+            <div class="service-icon">✂</div>
+            <div class="service-name">Classic Cut</div>
+            <div class="service-desc">A timeless precision cut tailored to your face shape. From skin fades to tapers — clean, sharp, and effortless every time.</div>
+            <div class="service-price">From $35</div>
+        </div>
+        <div class="service-card">
+            <div class="service-icon">🪒</div>
+            <div class="service-name">Royal Shave</div>
+            <div class="service-desc">The full straight razor experience. Hot towel prep, rich lather, and a smooth, close finish that speaks for itself.</div>
+            <div class="service-price">From $45</div>
+        </div>
+        <div class="service-card">
+            <div class="service-icon">💈</div>
+            <div class="service-name">Beard Sculpt</div>
+            <div class="service-desc">Expert shaping, trimming, and defining your beard's natural lines. Premium oil and balm finish included.</div>
+            <div class="service-price">From $30</div>
+        </div>
+        <div class="service-card">
+            <div class="service-icon">✦</div>
+            <div class="service-name">The Full Package</div>
+            <div class="service-desc">Cut + beard sculpt + hot towel royal shave. The complete gentleman's grooming experience, start to finish.</div>
+            <div class="service-price">From $90</div>
+        </div>
+    </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+    <div class="fade-in">
+        <div style="margin-bottom:3rem;">
+            <p class="section-label">Our Work</p>
+            <h2 class="section-title">The <em>Gallery</em></h2>
+        </div>
+        <!-- Replace each src with your actual gallery photos -->
+        <div class="gallery-grid">
+            <div class="gallery-item"><img src="https://placehold.co/800x400/18110a/c8993e?text=Featured+Work" alt="Featured Work" style="width:100%;height:100%;object-fit:cover;display:block;"><div class="gallery-overlay"><span>View</span></div></div>
+            <div class="gallery-item"><img src="https://placehold.co/400x400/18110a/c8993e?text=The+Fade" alt="The Fade" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"><div class="gallery-overlay"><span>View</span></div></div>
+            <div class="gallery-item"><img src="https://placehold.co/400x400/18110a/c8993e?text=Taper+Cut" alt="Taper Cut" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"><div class="gallery-overlay"><span>View</span></div></div>
+            <div class="gallery-item"><img src="https://placehold.co/400x400/18110a/c8993e?text=Beard+Sculpt" alt="Beard Sculpt" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"><div class="gallery-overlay"><span>View</span></div></div>
+            <div class="gallery-item"><img src="https://placehold.co/400x400/18110a/c8993e?text=Classic+Cut" alt="Classic Cut" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"><div class="gallery-overlay"><span>View</span></div></div>
+            <div class="gallery-item"><img src="https://placehold.co/400x400/18110a/c8993e?text=Royal+Shave" alt="Royal Shave" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"><div class="gallery-overlay"><span>View</span></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+    <div class="booking-container">
+        <div class="booking-header fade-in">
+            <p class="section-label">Reserve Your Chair</p>
+            <h2 class="section-title">Book an <em>Appointment</em></h2>
+            <p style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--cream-dim);margin-top:0.8rem;font-size:1.1rem;">Select a date and time that works for you.</p>
+        </div>
+
+        <div class="calendar-wrapper fade-in">
+            <div class="cal-nav">
+                <button class="cal-arrow" onclick="changeMonth(-1)">&#8249;</button>
+                <div class="cal-month-year" id="calMonthYear"></div>
+                <button class="cal-arrow" onclick="changeMonth(1)">&#8250;</button>
+            </div>
+            <div class="cal-days-header">
+                <div class="cal-day-name">Sun</div><div class="cal-day-name">Mon</div><div class="cal-day-name">Tue</div>
+                <div class="cal-day-name">Wed</div><div class="cal-day-name">Thu</div><div class="cal-day-name">Fri</div><div class="cal-day-name">Sat</div>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+        </div>
+
+        <div class="slots-wrapper fade-in">
+            <div class="slots-title" id="slotsTitle">Select a Date</div>
+            <div class="slots-subtitle" id="slotsSubtitle">Choose a date from the calendar to see available time slots.</div>
+            <div class="slots-grid" id="slotsGrid"></div>
+            <div class="booking-form" id="bookingForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Your full name" id="bName" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" placeholder="+1 (555) 000-0000" id="bPhone" autocomplete="tel">
+                </div>
+                <div class="form-group">
+                    <label>Select Service</label>
+                    <select id="bService">
+                        <option value="">Choose a service...</option>
+                        <option>Classic Cut — $35</option>
+                        <option>Royal Shave — $45</option>
+                        <option>Beard Sculpt — $30</option>
+                        <option>The Full Package — $90</option>
+                    </select>
+                </div>
+                <div id="bookingError" class="booking-error"></div>
+                <button class="btn-primary" onclick="confirmBooking()" style="margin-top:0.5rem;width:100%;text-align:center;">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SHOP -->
+<section id="shop">
+    <div class="shop-header fade-in">
+        <p class="section-label">The Collection</p>
+        <h2 class="section-title">CuttiWorld <em>Threads</em></h2>
+        <p style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--cream-dim);margin-top:0.8rem;font-size:1.1rem;">Curated luxury pieces for the discerning gentleman.</p>
+    </div>
+    <div class="shop-grid fade-in" id="shopGrid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-inner">
+        <div>
+            <div class="footer-logo">CuttiWorld</div>
+            <div class="footer-tagline">Where Tradition Meets Precision</div>
+            <div class="footer-address">123 Main Street, Suite 4<br>Your City, State 00000<br>(555) 123-4567</div>
+        </div>
+        <div>
+            <div class="footer-col-title">Navigate</div>
+            <ul class="footer-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#booking">Book Now</a></li>
+                <li><a href="#shop">Shop</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Hours</div>
+            <div class="footer-hours">
+                <p>Mon – Fri: 9am – 7pm</p>
+                <p>Saturday: 9am – 5pm</p>
+                <p>Sunday: Closed</p>
+            </div>
+        </div>
+        <div>
+            <div class="footer-col-title">Follow Us</div>
+            <ul class="footer-links">
+                <li><a href="#" rel="noopener noreferrer">Instagram</a></li>
+                <li><a href="#" rel="noopener noreferrer">Facebook</a></li>
+                <li><a href="#" rel="noopener noreferrer">TikTok</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© <span id="copyrightYear"></span> CuttiWorld All rights reserved.</p>
+        <p>Built with precision.</p>
+    </div>
+</footer>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+        <div class="cart-title">Your Cart</div>
+        <button class="cart-close" onclick="toggleCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+        <div class="cart-empty"><p>Your cart is empty.</p></div>
+    </div>
+    <div class="cart-footer">
+        <div class="cart-total-row">
+            <span class="cart-total-label">Total</span>
+            <span class="cart-total-amount" id="cartTotal">$0.00</span>
+        </div>
+        <button class="btn-primary" style="width:100%;text-align:center;">Proceed to Checkout</button>
+    </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+    <div class="modal">
+        <div class="modal-icon">✦ ✦ ✦</div>
+        <div class="modal-title">You're Booked!</div>
+        <div class="modal-message" id="modalMessage"></div>
+        <button class="btn-primary" onclick="closeModal()">Perfect, Thank You</button>
+    </div>
+</div>
+
+<script>
+// ── DOM CACHE ─────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+// ── CALENDAR ──────────────────────────────────────────
+let currentDate = new Date();
+let selectedDate = null;
+let selectedSlot = null;
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function isUnavailable(date) { return date.getDay() === 0; }
+
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const today = new Date(); today.setHours(0,0,0,0);
+    $('calMonthYear').textContent = `${months[month]} ${year}`;
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const grid = $('calGrid');
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < firstDay; i++) {
+        const c = document.createElement('div'); c.className = 'cal-cell empty'; frag.appendChild(c);
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div'); cell.className = 'cal-cell'; cell.textContent = d;
+        const cellDate = new Date(year, month, d); cellDate.setHours(0,0,0,0);
+        if (cellDate < today) { cell.classList.add('past'); }
+        else if (isUnavailable(cellDate)) { cell.classList.add('unavailable'); }
+        else {
+            if (cellDate.getTime() === today.getTime()) cell.classList.add('today');
+            if (selectedDate && cellDate.getTime() === selectedDate.getTime()) cell.classList.add('selected');
+            cell.addEventListener('click', () => selectDate(new Date(year, month, d)));
+        }
+        frag.appendChild(cell);
+    }
+    grid.innerHTML = '';
+    grid.appendChild(frag);
+}
+
+function selectDate(date) {
+    selectedDate = date; selectedSlot = null;
+    $('bookingForm').classList.remove('visible');
+    renderCalendar(); renderSlots();
+}
+
+function changeMonth(dir) {
+    const next = new Date(currentDate.getFullYear(), currentDate.getMonth() + dir, 1);
+    const floor = new Date(); floor.setDate(1); floor.setHours(0,0,0,0);
+    if (next < floor) return;
+    currentDate = next;
+    renderCalendar();
+}
+
+const allSlots = ['9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','1:00 PM','1:30 PM','2:00 PM','2:30 PM','3:00 PM','3:30 PM','4:00 PM','4:30 PM','5:00 PM','5:30 PM'];
+function getTakenSlots(date) { const s = date.getDate() + date.getMonth() * 31; return allSlots.filter((_,i) => (s + i * 7) % 5 === 0); }
+
+function renderSlots() {
+    const title = $('slotsTitle');
+    const subtitle = $('slotsSubtitle');
+    const grid = $('slotsGrid');
+    if (!selectedDate) {
+        title.textContent = 'Select a Date';
+        subtitle.textContent = 'Choose a date from the calendar to see available slots.';
+        grid.innerHTML = '';
+        return;
+    }
+    title.textContent = selectedDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+    subtitle.textContent = 'Select your preferred time slot.';
+    const taken = getTakenSlots(selectedDate);
+    const frag = document.createDocumentFragment();
+    allSlots.forEach(slot => {
+        const el = document.createElement('div'); el.className = 'slot'; el.textContent = slot;
+        if (taken.includes(slot)) { el.classList.add('taken'); }
+        else {
+            if (selectedSlot === slot) el.classList.add('selected');
+            el.addEventListener('click', () => {
+                selectedSlot = slot; renderSlots();
+                $('bookingForm').classList.add('visible');
+            });
+        }
+        frag.appendChild(el);
+    });
+    grid.innerHTML = '';
+    grid.appendChild(frag);
+}
+
+const BOOKING_EMAIL = 'bookings@cuttiworld.com';
+
+function showBookingError(msg) {
+    const err = $('bookingError');
+    err.textContent = msg;
+    err.style.display = msg ? 'block' : 'none';
+}
+
+function confirmBooking() {
+    const name = $('bName').value.trim();
+    const phone = $('bPhone').value.trim();
+    const service = $('bService').value;
+    if (!name || !phone || !service) { showBookingError('Please fill in all fields to confirm your booking.'); return; }
+    showBookingError('');
+    const dateStr = selectedDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+    const serviceName = service.split(' —')[0];
+    const subject = `Booking Request — ${serviceName} on ${dateStr}`;
+    const body = `Hi CuttiWorld,\n\nI'd like to book an appointment:\n\nName: ${name}\nPhone: ${phone}\nService: ${service}\nDate: ${dateStr}\nTime: ${selectedSlot}\n\nThank you!`;
+    location.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    $('modalMessage').textContent = `${name}, your ${serviceName} request for ${dateStr} at ${selectedSlot} has been sent. We'll confirm via phone shortly!`;
+    $('bookingModal').classList.add('open');
+}
+
+function closeModal() {
+    $('bookingModal').classList.remove('open');
+    ['bName','bPhone'].forEach(id => $(id).value = '');
+    $('bService').value = '';
+    showBookingError('');
+    selectedDate = null; selectedSlot = null;
+    $('bookingForm').classList.remove('visible');
+    renderCalendar(); renderSlots();
+}
+
+// ── SHOP ──────────────────────────────────────────────
+const products = [
+    { id:1, name:'Silk Oxford Shirt', category:'Shirts', desc:'Premium Egyptian cotton with a silk finish. Italian collar, French cuffs.', price:185, emoji:'👔', badge:'New' },
+    { id:2, name:'Linen Trousers', category:'Bottoms', desc:'Slim-cut European linen. Breathable, refined, and effortlessly timeless.', price:210, emoji:'👖', badge:null },
+    { id:3, name:'Cashmere Turtleneck', category:'Knitwear', desc:'Grade-A Mongolian cashmere. Soft, warm, and impeccably structured.', price:320, emoji:'🧥', badge:'Bestseller' },
+    { id:4, name:'Merino Wool Blazer', category:'Outerwear', desc:'Single-breasted Italian merino. Peak lapels, half-lined, unstructured shoulder.', price:485, emoji:'🥼', badge:null },
+    { id:5, name:'Suede Chelsea Boots', category:'Footwear', desc:'Hand-stitched Spanish suede with crepe sole. Rich tobacco brown.', price:380, emoji:'👞', badge:'Limited' },
+    { id:6, name:'Silk Pocket Square', category:'Accessories', desc:'Hand-rolled edges, 100% mulberry silk. Classic paisley weave.', price:65, emoji:'🎀', badge:null },
+];
+let cart = JSON.parse(localStorage.getItem('cwCart') || '{}');
+function saveCart() { localStorage.setItem('cwCart', JSON.stringify(cart)); }
+
+function renderShop() {
+    $('shopGrid').innerHTML = products.map(p => `
+        <div class="product-card">
+            <div class="product-image">
+                <span style="font-size:4.5rem">${p.emoji}</span>
+                ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+            </div>
+            <div class="product-info">
+                <div class="product-category">${p.category}</div>
+                <div class="product-name">${p.name}</div>
+                <div class="product-desc">${p.desc}</div>
+                <div class="product-footer">
+                    <div class="product-price">$${p.price}</div>
+                    <button class="add-to-cart" onclick="addToCart(${p.id})">Add to Cart</button>
+                </div>
+            </div>
+        </div>`).join('');
+}
+
+function addToCart(id) {
+    cart[id] = (cart[id] || 0) + 1;
+    saveCart(); updateCartUI();
+    const btn = document.querySelector('.cart-btn');
+    btn.style.borderColor = 'var(--gold)'; btn.style.color = 'var(--gold)';
+    setTimeout(() => { btn.style.borderColor = ''; btn.style.color = ''; }, 700);
+}
+function removeFromCart(id) { delete cart[id]; saveCart(); updateCartUI(); }
+function changeQty(id, delta) {
+    cart[id] = (cart[id] || 0) + delta;
+    if (cart[id] <= 0) delete cart[id];
+    saveCart(); updateCartUI();
+}
+
+function updateCartUI() {
+    const total = Object.entries(cart).reduce((sum, [id, qty]) => {
+        const p = products.find(p => p.id === Number.parseInt(id, 10));
+        return sum + (p ? p.price * qty : 0);
+    }, 0);
+    const count = Object.values(cart).reduce((a, b) => a + b, 0);
+    $('cartCount').textContent = count;
+    const container = $('cartItems');
+    if (count === 0) {
+        container.innerHTML = '<div class="cart-empty"><p>Your cart is empty.</p></div>';
+    } else {
+        container.innerHTML = Object.entries(cart).map(([id, qty]) => {
+            const p = products.find(p => p.id === Number.parseInt(id, 10));
+            return `<div class="cart-item">
+                <div class="cart-item-image">${p.emoji}</div>
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${p.name}</div>
+                    <div class="cart-item-price">$${p.price}</div>
+                    <div class="cart-item-controls">
+                        <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+                        <span class="qty-display">${qty}</span>
+                        <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+                        <button class="cart-item-remove" onclick="removeFromCart(${id})">Remove</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    $('cartTotal').textContent = `$${total.toFixed(2)}`;
+}
+
+function toggleCart() {
+    const s = $('cartSidebar'); const o = $('cartOverlay');
+    const isOpen = s.classList.toggle('open');
+    o.classList.toggle('open');
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+// ── MOBILE NAV ────────────────────────────────────────
+function toggleMobileNav() {
+    const nav = $('mobileNav');
+    const burger = $('hamburger');
+    const isOpen = nav.classList.toggle('open');
+    burger.classList.toggle('open');
+    burger.setAttribute('aria-expanded', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+// ── SCROLL ANIMATIONS ─────────────────────────────────
+const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+// ── INIT ──────────────────────────────────────────────
+$('copyrightYear').textContent = new Date().getFullYear();
+renderCalendar(); renderSlots(); renderShop(); updateCartUI();
+</script>
+</body>
+</html>
